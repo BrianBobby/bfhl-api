@@ -1,12 +1,10 @@
-    require('dotenv').config();
+require('dotenv').config();
 const express = require('express');
 
 const app = express();
 app.use(express.json());
 
-// Helpers
 const buildUserId = (fullName, dob) => {
-  // full_name_ddmmyyyy, full name to lowercase, spaces -> underscores
   if (!fullName) fullName = 'john_doe';
   if (!dob) dob = '17091999';
   return `${fullName.trim().toLowerCase().replace(/\s+/g, '_')}_${dob}`;
@@ -14,6 +12,10 @@ const buildUserId = (fullName, dob) => {
 
 const isIntegerToken = (s) => /^-?\d+$/.test(s);
 const isAlphaToken = (s) => /^[A-Za-z]+$/.test(s);
+
+app.get('/', (req, res) => {
+  res.send('Server is running ✅. Try POST /bfhl');
+});
 
 app.post('/bfhl', (req, res) => {
   try {
@@ -25,37 +27,33 @@ app.post('/bfhl', (req, res) => {
       });
     }
 
-    // Prepare output containers
     const even_numbers = [];
     const odd_numbers = [];
     const alphabets = [];
     const special_characters = [];
     let sum = 0;
-    const alphaChars = []; // for building concat_string (char-by-char across tokens)
+    const alphaChars = [];
 
-    // Process each token
     data.forEach(rawItem => {
-      const token = String(rawItem); // keep original string form for output
+      const token = String(rawItem);
       if (isIntegerToken(token)) {
         const n = parseInt(token, 10);
         if (n % 2 === 0) even_numbers.push(token); else odd_numbers.push(token);
         sum += n;
       } else if (isAlphaToken(token)) {
         alphabets.push(token.toUpperCase());
-        for (const ch of token) alphaChars.push(ch); // keep original char case for alternating later
+        for (const ch of token) alphaChars.push(ch);
       } else {
-        special_character = token; // no transformation
+        special_character = token;
         special_characters.push(token);
       }
     });
 
-    // Build concat_string: reverse all collected alpha characters and alternate caps starting with UPPER
     const reversedChars = alphaChars.reverse();
     const concat_string = reversedChars
       .map((ch, idx) => (idx % 2 === 0 ? ch.toUpperCase() : ch.toLowerCase()))
       .join('');
 
-    // Build response
     const response = {
       is_success: true,
       user_id: buildUserId(process.env.FULL_NAME, process.env.DOB),
