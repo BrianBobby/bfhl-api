@@ -69,7 +69,9 @@ Response:
 ```
 How to Test
 ▶ Using PowerShell (Windows)
+```bash
 Invoke-RestMethod -Uri "https://bfhl-api-pwly.onrender.com/bfhl" `
   -Method Post `
   -Body '{"data":["a","1","334","4","R","$"]}' `
   -ContentType "application/json" | ConvertTo-Json -Depth 5
+```
